@@ -37,4 +37,6 @@ coord = SkyCoord(img_header['CRVAL1']*u.deg,img_header['CRVAL2']*u.deg)
 
 coneGaia = u.Quantity(5, u.deg)
 
-Gaia.cone_search_async(coordinate=coord, radius=coneGaia, output_file=f'{file}_gaia_cone.fits',output_format='fits',dump_to_file=True)
+print('Query gaia stars...')
+Gaia.ROW_LIMIT = -1
+Gaia.cone_search_async(coordinate=coord, radius=coneGaia, output_file=f'{file}_gaia_cone.fits.gz',output_format='fits',dump_to_file=True)
