@@ -47,7 +47,7 @@ x_gaia, y_gaia = [], []
 for i in trange(len(gaiaTable['source_id'])): 
     stars = wcs.world_to_pixel(SkyCoord(gaiaTable['ra'][i]*u.deg,gaiaTable['dec'][i]*u.deg))
 
-    if 0<stars[0]<img_data.shape[0] and 0<stars[1]<img_data.shape[1] and gaiaTable['phot_g_mean_mag'][i]<16:
+    if 0<stars[0]<img_data.shape[1] and 0<stars[1]<img_data.shape[0] and gaiaTable['phot_g_mean_mag'][i]<16: 
         x_gaia.append(stars[0])
         y_gaia.append(stars[1])
 print('Number of stars found in img:',len(x_gaia))
