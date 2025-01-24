@@ -20,7 +20,7 @@ def gaia_catalog_names_coord(coords,serach_radius):
         - coord: A SkyCoord object
         - radius: the radius used for cone search, in Quantity units
     
-    Return:
+    Output:
         - cat_name: Catalogue name
     """
     ra  = coords.ra.to_string(alwayssign=True)
@@ -34,3 +34,21 @@ def gaia_catalog_names_coord(coords,serach_radius):
 
     return cat_name
 
+def coord_from_cat_name(cat_name):
+    """
+    Extract coordinate from the name of the Gaia catalogue
+
+    Input: 
+        - cat_name: the catalogue name, in the format of the results of gaia_catalog_names_coord()
+
+    Output:
+        - coord: A skyCoord object 
+    """
+
+    cat_name_list = cat_name.split('_')
+    ra  = cat_name_list[cat_name_list.index('ra') +1]
+    dec = cat_name_list[cat_name_list.index('dec')+1]
+
+    coord = SkyCoord(ra,dec)
+    
+    return coord
