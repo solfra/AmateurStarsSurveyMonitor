@@ -43,12 +43,17 @@ def coord_from_cat_name(cat_name):
 
     Output:
         - coord: A skyCoord object 
+        - search_radius: the radius used for cone search, in Quantity units
     """
 
     cat_name_list = cat_name.split('_')
     ra  = cat_name_list[cat_name_list.index('ra') +1]
     dec = cat_name_list[cat_name_list.index('dec')+1]
 
+    radius_value = cat_name_list[cat_name_list.index('in') +1]
+    radius_unit  = cat_name_list[cat_name_list.index('in') +2]
+
     coord = SkyCoord(ra,dec)
+    search_radius = u.Quantity(radius_value, u.Unit(radius_unit))
     
-    return coord
+    return coord, search_radius
