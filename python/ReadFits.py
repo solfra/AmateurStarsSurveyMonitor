@@ -16,6 +16,7 @@ from astropy.coordinates import SkyCoord
 from astroquery.gaia import Gaia
 from astropy.wcs import WCS
 from tqdm import trange
+from Gaia_tools import gaia_catalog_names_coord
 
 parser = argparse.ArgumentParser(description='Read a Fits file')
 parser.add_argument('file',type=str, help='File to read')
@@ -33,14 +34,15 @@ for key in img_header:
 coord = SkyCoord(img_header['CRVAL1']*u.deg,img_header['CRVAL2']*u.deg)
 
 coneGaia = u.Quantity(3, u.deg)
+table_name = gaia_catalog_names_coord(coord,coneGaia)
 
 print('Query gaia stars...')
 Gaia.ROW_LIMIT = -1
-Gaia.cone_search_async(coordinate=coord, radius=coneGaia, output_file=f'{file}_gaia_cone.fits.gz',output_format='fits',dump_to_file=True)
+Gaia.cone_search_async(coordinate=coord, radius=coneGaia, output_file=table_name,output_format='fits',dump_to_file=True)
 
 wcs = WCS(img_header) 
 
-gaiaTable = fits.open(f'{file}_gaia_cone.fits.gz')[1].data
+gaiaTable = fits.open(table_name)[1].data
 
 x_gaia, y_gaia = [], []
 
