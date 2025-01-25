@@ -28,9 +28,6 @@ fitsFile = fits.open(file)
 img_data = fitsFile[0].data
 img_header = fitsFile[0].header
 
-for key in img_header:
-    print(f' {key}: {img_header[key]}')
-
 coord = SkyCoord(img_header['CRVAL1']*u.deg,img_header['CRVAL2']*u.deg)
 
 coneGaia = u.Quantity(3, u.deg)
@@ -58,4 +55,4 @@ norm = ImageNormalize(img_data, interval=ZScaleInterval())
 plt.figure(figsize=(15,15))
 plt.imshow(img_data,norm=norm,origin='lower',cmap='gray')
 plt.plot(x_gaia,y_gaia,'r.')
-plt.show()
+plt.savefig(file+'.png')
