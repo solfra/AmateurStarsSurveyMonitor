@@ -8,6 +8,7 @@
 ################################################################################
 
 from astropy.io import fits
+from astropy.table import Table
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,6 +19,7 @@ from astroquery.gaia import Gaia
 from astropy.wcs import WCS
 from tqdm import trange
 from Gaia_tools import gaia_catalog_names_coord
+from General_tools import init_dict_stat
 
 parser = argparse.ArgumentParser(description='Read a Fits file')
 parser.add_argument('file',type=str, help='File to read')
@@ -67,3 +69,26 @@ plt.savefig(file+'.png')
 if args.show:
     plt.show()
 plt.close()
+
+# Extract catalogue with only stars of the image
+# Column from the Gaia cat
+column_name_Gaia = ['designation','source_id',
+                    'ra','dec','parallax','pmra','pmdec',
+                    'phot_bp_mean_mag','phot_rp_mean_mag',
+                    'phot_g_mean_mag','bp_rp','bp_g','g_rp',
+                    'phot_variable_flag']
+
+gaia_export_cat = init_dict_stat(column_name_Gaia)
+
+for column in gaia_export_cat :
+    gaia_export_cat[column] = gaiaTable[column][starsImage]
+
+# Add column from this code
+column_name_img =['X_IMAGE','Y_IMAGE']
+
+img_cat = init_dict_stat(column_name_img)
+img_cat['X_IMAGE'] = x_gaia
+img_cat['Y_IMAGE'] = y_gaia
+
+final_table = Table(gaia_export_cat | img_cat)
+final_table.write(file+'_cat.fits')
