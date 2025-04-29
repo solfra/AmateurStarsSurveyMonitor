@@ -19,7 +19,9 @@ from astroquery.gaia import Gaia
 from astropy.wcs import WCS
 from tqdm import trange
 from Gaia_tools import gaia_catalog_names_coord
-from General_tools import init_dict_stat
+from General_tools import init_dict_stat, create_position_array
+from photutils.aperture import CircularAperture
+from photutils.aperture import aperture_photometry
 
 parser = argparse.ArgumentParser(description='Read a Fits file')
 parser.add_argument('file',type=str, help='File to read')
@@ -28,6 +30,10 @@ parser.add_argument('--show',help='show plot',action='store_true')
 args = parser.parse_args()
 
 file = args.file
+
+#New colum for this catalogue
+column_name_img =['X_IMAGE','Y_IMAGE','aper']
+img_cat = init_dict_stat(column_name_img)
 
 fitsFile = fits.open(file)
 img_data = fitsFile[0].data
@@ -56,15 +62,23 @@ starsImage = np.where( (0<gaia_stars_pixel[1]) & (gaia_stars_pixel[1]<img_data.s
                        (0<gaia_stars_pixel[0]) & (gaia_stars_pixel[0]<img_data.shape[1]) & 
                        (gaiaTable['phot_g_mean_mag'] < 16))
 
-x_gaia = gaia_stars_pixel[0][starsImage]
-y_gaia = gaia_stars_pixel[1][starsImage]
+img_cat['X_IMAGE'] = gaia_stars_pixel[0][starsImage]
+img_cat['Y_IMAGE'] = gaia_stars_pixel[1][starsImage]
 
-print('Number of stars found in img:',len(x_gaia))
+source_position = create_position_array(img_cat['X_IMAGE'],img_cat['Y_IMAGE'])
+aperPhot = 7
+
+apertur7 = CircularAperture(source_position, r=aperPhot)
+
+circ_apstats = aperture_photometry(img_data, apertur7)
+img_cat['aper']=circ_apstats['aperture_sum'] # this is not background substracted ! So photometry is wrong !
+
+print('Number of stars found in img:',len(img_cat['X_IMAGE']))
 
 norm = ImageNormalize(img_data, interval=ZScaleInterval())
 plt.figure(figsize=(15,15))
 plt.imshow(img_data,norm=norm,origin='lower',cmap='gray')
-plt.plot(x_gaia,y_gaia,'r.')
+plt.plot(img_cat['X_IMAGE'],img_cat['Y_IMAGE'],'r.')
 plt.savefig(file+'.png')
 if args.show:
     plt.show()
@@ -83,12 +97,5 @@ gaia_export_cat = init_dict_stat(column_name_Gaia)
 for column in gaia_export_cat :
     gaia_export_cat[column] = gaiaTable[column][starsImage]
 
-# Add column from this code
-column_name_img =['X_IMAGE','Y_IMAGE']
-
-img_cat = init_dict_stat(column_name_img)
-img_cat['X_IMAGE'] = x_gaia
-img_cat['Y_IMAGE'] = y_gaia
-
 final_table = Table(gaia_export_cat | img_cat)
-final_table.write(file+'_cat.fits')
+final_table.write(file+'_cat.fits',overwrite=True)
