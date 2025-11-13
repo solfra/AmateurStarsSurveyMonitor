@@ -32,7 +32,7 @@ args = parser.parse_args()
 file = args.file
 
 #New colum for this catalogue
-column_name_img =['X_IMAGE','Y_IMAGE','aper']
+column_name_img =['X_IMAGE','Y_IMAGE','flux aper7 raw']
 img_cat = init_dict_stat(column_name_img)
 
 fitsFile = fits.open(file)
@@ -42,8 +42,8 @@ wcs = WCS(img_header)
 
 coord = SkyCoord(img_header['CRVAL1']*u.deg,img_header['CRVAL2']*u.deg)
 
-coneGaia = u.Quantity(3, u.deg)
 if not args.gaiaCat:
+    coneGaia = u.Quantity(3, u.deg)
     table_name = gaia_catalog_names_coord(coord,coneGaia)
     print('Query gaia stars...')
     Gaia.ROW_LIMIT = -1
@@ -71,7 +71,7 @@ aperPhot = 7
 apertur7 = CircularAperture(source_position, r=aperPhot)
 
 circ_apstats = aperture_photometry(img_data, apertur7)
-img_cat['aper']=circ_apstats['aperture_sum'] # this is not background substracted ! So photometry is wrong !
+img_cat['flux aper7 raw']=circ_apstats['aperture_sum'] # this is not background substracted ! So photometry is wrong !
 
 print('Number of stars found in img:',len(img_cat['X_IMAGE']))
 
